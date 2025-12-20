@@ -166,12 +166,16 @@ export const jpycGetCurrentChainTool = createTool({
 	id: "jpyc_get_current_chain",
 	description:
 		"現在選択されているテストネットを取得します。ユーザーが「今どのチェーン？」「現在のネットワークは？」などと聞いた場合に使用します。",
-	inputSchema: z.object({}),
-	execute: async () => {
+	inputSchema: z.object({
+		_dummy: z.string().optional().describe("ダミーパラメータ（使用しません）"),
+	}),
+	execute: async ({ context }) => {
 		try {
 			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
+
+			console.log(`jpyc_get_current_chain: chain=${currentChain}`);
 
 			return {
 				success: true,
@@ -180,6 +184,7 @@ export const jpycGetCurrentChainTool = createTool({
 				address: getCurrentAddress(),
 			};
 		} catch (error: unknown) {
+			console.error(`jpyc_get_current_chain error:`, error);
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : String(error),
@@ -196,14 +201,20 @@ export const jpycTotalSupplyTool = createTool({
 	id: "jpyc_total_supply",
 	description:
 		"現在選択されているテストネットでのJPYCの総供給量を照会します。ユーザーが「総供給量は？」「流通量を教えて」などと聞いた場合に使用します。",
-	inputSchema: z.object({}),
-	execute: async () => {
+	inputSchema: z.object({
+		_dummy: z.string().optional().describe("ダミーパラメータ（使用しません）"),
+	}),
+	execute: async ({ context }) => {
 		try {
 			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
 			// SDKのtotalSupplyメソッドを呼び出して総供給量を取得する
 			const totalSupply = await jpyc.totalSupply();
+
+			console.log(
+				`jpyc_total_supply: totalSupply=${totalSupply} JPYC, chain=${currentChain}`,
+			);
 
 			return {
 				success: true,
@@ -213,6 +224,7 @@ export const jpycTotalSupplyTool = createTool({
 				chainName: chainName,
 			};
 		} catch (error: unknown) {
+			console.error(`jpyc_total_supply error:`, error);
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : String(error),
