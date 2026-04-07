@@ -97,6 +97,10 @@ export default function ChatInterface() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					message: input,
+					messages: messages.map((m) => ({
+						role: m.role,
+						content: m.content,
+					})),
 					conversationId,
 					profile,
 					friends,

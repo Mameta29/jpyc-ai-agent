@@ -1,4 +1,4 @@
-import { getCurrentChain, getChainName } from "@/lib/jpyc/sdk";
+import { getCurrentChain, getChainName } from "@/lib/jpyc/client";
 import { NextResponse } from "next/server";
 
 export async function GET() {

@@ -8,8 +8,8 @@ import type { NextRequest } from "next/server";
  */
 export async function POST(req: NextRequest) {
 	try {
-		// リクエストパラメータからメッセージ、会話ID、プロフィール、友達リストを取得
-		const { message, conversationId, profile, friends } = await req.json();
+		// リクエストパラメータからメッセージ、会話履歴、プロフィール、友達リストを取得
+		const { message, messages: history, conversationId, profile, friends } = await req.json();
 
 		if (!message) {
 			return new Response(
@@ -41,10 +41,26 @@ export async function POST(req: NextRequest) {
 			contextMessage = message + context;
 		}
 
+		// 会話履歴を構築
+		const mastraMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
+		if (history && Array.isArray(history)) {
+			for (const msg of history) {
+				mastraMessages.push({
+					role: msg.role as "user" | "assistant",
+					content: msg.content,
+				});
+			}
+		}
+		// 最新のユーザーメッセージを追加
+		mastraMessages.push({ role: "user" as const, content: contextMessage });
+
 		// Mastraで定義したJPYC AI Agentの機能を呼び出す
-		const response = await jpycAgent.generate(contextMessage, {
-			...(conversationId && { conversationId }),
-		});
+		const response = await jpycAgent.generate(
+			mastraMessages as Parameters<typeof jpycAgent.generate>[0],
+			{
+				...(conversationId && { conversationId }),
+			},
+		);
 
 		console.log("Full generate response:", JSON.stringify(response, null, 2));
 		console.log("Generate response summary:", {
