@@ -11,9 +11,9 @@
 		"test": "echo \"No tests yet\""
 	},
 	"dependencies": {
-		"@jpyc/sdk-core": "workspace:*",
 		"@mastra/mcp": "^0.14.1",
 		"@mastra/core": "^0.23.3",
+		"viem": "^2.38.5",
 		"zod": "^3.24.1",
 		"dotenv": "^16.4.7"
 	},

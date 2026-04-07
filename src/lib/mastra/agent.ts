@@ -1,28 +1,13 @@
 import { Agent } from "@mastra/core/agent";
-import { claude } from "./model";
+import { jpycTools } from "@/lib/jpyc/tools";
+import { gemini } from "./model";
 
-/**
- * JPYC エージェント
- *
- * MCP経由でJPYC SDKツールを使用するエージェント
- *
- * 学習用ポイント:
- * - tools は動的関数として定義
- * - MCPClientから getTools() でツールを取得
- * - 循環参照を避けるため、動的インポートを使用
- */
 export const jpycAgent = new Agent({
 	name: "JPYC Assistant",
 	description:
 		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
-	model: claude,
-	// MCPClient経由でツールを動的に取得
-	tools: async () => {
-		const { jpycMCPClient } = await import("@/lib/mastra/mcp/client");
-		const tools = await jpycMCPClient.getTools();
-		// biome-ignore lint/suspicious/noExplicitAny: MCPツールの型とMastraツールの型の互換性の問題
-		return tools as any;
-	},
+	model: gemini,
+	tools: jpycTools,
 	instructions: `
 あなたはJPYC（日本円ステーブルコイン）の操作をサポートするAIアシスタントです。
 

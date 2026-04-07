@@ -11,15 +11,12 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia, polygonAmoy, avalancheFuji } from "viem/chains";
 
-// サポートするチェーン
 export type SupportedChain = "sepolia" | "amoy" | "fuji";
 
-// JPYCコントラクトアドレス（全チェーン共通）
 const JPYC_ADDRESS =
 	"0xE7C3D8C9a439feDe00D2600032D5dB0Be71C3c29" as const satisfies Address;
 const JPYC_DECIMALS = 18;
 
-// チェーン設定
 const CHAIN_CONFIG = {
 	sepolia: {
 		chain: sepolia,
@@ -38,7 +35,6 @@ const CHAIN_CONFIG = {
 	},
 } as const;
 
-// JPYCコントラクトABI（使用する関数のみ）
 const JPYC_ABI = [
 	{
 		name: "totalSupply",
@@ -66,7 +62,6 @@ const JPYC_ABI = [
 	},
 ] as const;
 
-// 現在選択されているチェーン（デフォルトはSepolia）
 let _currentChain: SupportedChain = "sepolia";
 let _account: ReturnType<typeof privateKeyToAccount> | null = null;
 
@@ -102,9 +97,6 @@ function getJpycContract(chain: SupportedChain = _currentChain) {
 	});
 }
 
-/**
- * チェーンを切り替える関数
- */
 export function switchChain(chain: SupportedChain): void {
 	if (!CHAIN_CONFIG[chain]) {
 		throw new Error(
@@ -114,35 +106,20 @@ export function switchChain(chain: SupportedChain): void {
 	_currentChain = chain;
 }
 
-/**
- * 現在のチェーンを取得する関数
- */
 export function getCurrentChain(): SupportedChain {
 	return _currentChain;
 }
 
-/**
- * チェーンの表示名を取得する関数
- */
 export function getChainName(chain?: SupportedChain): string {
 	const targetChain = chain || _currentChain;
 	return CHAIN_CONFIG[targetChain]?.name ?? "Ethereum Sepolia";
 }
 
-/**
- * 現在のアカウントアドレスを取得する関数
- */
 export function getCurrentAddress(): Hex {
 	return getAccount().address;
 }
 
-/**
- * JPYC操作インターフェース（viem直接実装）
- */
 export const jpyc = {
-	/**
-	 * 総供給量を取得するメソッド
-	 */
 	async totalSupply(): Promise<string> {
 		try {
 			const contract = getJpycContract();
@@ -154,9 +131,6 @@ export const jpyc = {
 		}
 	},
 
-	/**
-	 * JPYCの残高を取得するメソッド
-	 */
 	async balanceOf(params: { account: Hex }): Promise<string> {
 		try {
 			const contract = getJpycContract();
@@ -168,9 +142,6 @@ export const jpyc = {
 		}
 	},
 
-	/**
-	 * JPYCを送金するメソッド
-	 */
 	async transfer(params: { to: Hex; value: number }): Promise<string> {
 		try {
 			const contract = getJpycContract();

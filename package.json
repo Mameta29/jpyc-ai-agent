@@ -8,7 +8,7 @@
 	"scripts": {
 		"dev": "next dev",
 		"mcp:dev": "pnpm --filter @jpyc/mcp-server dev",
-		"build": "pnpm --filter @jpyc/sdk-core compile && pnpm --filter @jpyc/mcp-server build && next build",
+		"build": "pnpm --filter @jpyc/mcp-server build && next build",
 		"start": "next start",
 		"lint": "next lint",
 		"format": "pnpm exec biome format --write ."
@@ -17,7 +17,6 @@
 		"@ai-sdk/anthropic": "^2.0.40",
 		"@ai-sdk/google": "^2.0.26",
 		"@ai-sdk/openai": "^2.0.58",
-		"@jpyc/sdk-core": "workspace:*",
 		"@mastra/core": "^0.23.3",
 		"@mastra/mcp": "^0.14.1",
 		"@modelcontextprotocol/sdk": "^1.0.4",

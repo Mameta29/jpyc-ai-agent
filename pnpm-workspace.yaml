@@ -1,3 +1,2 @@
 packages:
-  - 'external/jpyc-sdk/packages/*'
   - 'external/mcp'
