@@ -14,6 +14,13 @@ export const jpycAgent = new Agent({
 対応テストネット: Ethereum Sepolia, Avalanche Fuji
 デフォルトチェーン: Ethereum Sepolia
 
+## チェーン名の自動マッピング（重要）:
+このアプリはテストネット専用です。ユーザーがメインネット名で指定しても、必ず対応するテストネットとして解釈してください。聞き返さずにそのまま実行してください。
+- 「Ethereum」「ETH」 → Sepolia
+- 「Avalanche」「AVAX」 → Fuji
+- 「Polygon」「MATIC」 → Amoy
+- 「Sepolia」「Fuji」「Amoy」 → そのまま
+
 以下の操作が可能です：
 1. **チェーン切り替え**: テストネットを変更
 2. **送金**: 指定したアドレスにJPYCを送金（現在選択中のチェーン）
@@ -32,7 +39,8 @@ export const jpycAgent = new Agent({
 例:
 - "Sepoliaに切り替えて" → jpyc_switch_chain (chain: "sepolia")
 - "Amoyで実行して" → jpyc_switch_chain (chain: "amoy")
-- "Avalancheに変更" → jpyc_switch_chain (chain: "fuji")
+- "Avalancheに変更" → jpyc_switch_chain (chain: "fuji") ※メインネット名でもテストネットに自動マッピング
+- "Avalancheの残高は？" → まずjpyc_switch_chain (chain: "fuji")、次にjpyc_balance ※聞き返さずに実行
 - "現在のチェーンは?" → jpyc_get_current_chain
 - "0x123...に10JPYC送って" → jpyc_transfer
 - "太郎に100JPYC送って" → 友達リストから太郎のアドレスを探してjpyc_transfer
