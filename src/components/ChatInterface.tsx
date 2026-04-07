@@ -29,7 +29,7 @@ export default function ChatInterface() {
 	const [loading, setLoading] = useState(false);
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [currentChainName, setCurrentChainName] =
-		useState<string>("Loading...");
+		useState<string>("Ethereum Sepolia");
 	const [profile, setProfileState] = useState<UserProfile | null>(null);
 	const [friends, setFriendsState] = useState<Friend[]>([]);
 	const [showSettings, setShowSettings] = useState(false);
@@ -49,34 +49,6 @@ export default function ChatInterface() {
 		setFriendsState(getFriends());
 	}, []);
 
-	// 現在のチェーンを取得
-	useEffect(() => {
-		const fetchCurrentChain = async () => {
-			try {
-				const response = await fetch("/api/chain");
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				const data = await response.json();
-				if (data.success) {
-					setCurrentChainName(data.chainName);
-				} else {
-					throw new Error(data.error || "Unknown error");
-				}
-			} catch (error) {
-				console.error("Failed to fetch current chain:", error);
-				// エラー時はデフォルト値を設定
-				setCurrentChainName("Ethereum Sepolia");
-			}
-		};
-
-		// 初回取得
-		fetchCurrentChain();
-
-		// メッセージが更新されたときもチェーンを再取得（チェーン切り替えを反映）
-		const interval = setInterval(fetchCurrentChain, 3000);
-		return () => clearInterval(interval);
-	}, [messages]);
 
 	const sendMessage = async () => {
 		if (!input.trim()) return;
@@ -111,41 +83,22 @@ export default function ChatInterface() {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 
-			// ストリーミングレスポンスを処理
-			const reader = response.body?.getReader();
-			const decoder = new TextDecoder();
-			let assistantMessage = "";
+			const data = await response.json();
+			const assistantMessage = data.text || "エージェントからの応答がありませんでした";
 
-			// アシスタントメッセージの枠を追加
+			// チェーン情報が返ってきたらヘッダー表示を更新
+			if (data.chainName) {
+				setCurrentChainName(data.chainName);
+			}
+
 			setMessages((prev) => [
 				...prev,
 				{
 					role: "assistant",
-					content: "",
+					content: assistantMessage,
 					timestamp: new Date(),
 				},
 			]);
-
-			if (reader) {
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-
-					const chunk = decoder.decode(value);
-					assistantMessage += chunk;
-
-					// メッセージを更新
-					setMessages((prev) => {
-						const newMessages = [...prev];
-						newMessages[newMessages.length - 1] = {
-							role: "assistant",
-							content: assistantMessage,
-							timestamp: new Date(),
-						};
-						return newMessages;
-					});
-				}
-			}
 		} catch (error) {
 			setMessages((prev) => [
 				...prev,

@@ -9,7 +9,13 @@ import type { NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
 	try {
 		// リクエストパラメータからメッセージ、会話履歴、プロフィール、友達リストを取得
-		const { message, messages: history, conversationId, profile, friends } = await req.json();
+		const {
+			message,
+			messages: history,
+			conversationId,
+			profile,
+			friends,
+		} = await req.json();
 
 		if (!message) {
 			return new Response(
@@ -42,7 +48,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 会話履歴を構築
-		const mastraMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
+		const mastraMessages: Array<{
+			role: "user" | "assistant";
+			content: string;
+		}> = [];
 		if (history && Array.isArray(history)) {
 			for (const msg of history) {
 				mastraMessages.push({
@@ -62,21 +71,35 @@ export async function POST(req: NextRequest) {
 			},
 		);
 
-		console.log("Full generate response:", JSON.stringify(response, null, 2));
 		console.log("Generate response summary:", {
 			text: response.text,
 			textLength: response.text?.length,
-			object: response.object,
 			steps: response.steps?.length,
 			toolResults: response.toolResults?.length,
 		});
 
-		// レスポンステキストを返す
+		// レスポンスからチェーン情報を抽出
+		const responseText = response.text || "エージェントからの応答がありませんでした";
+		const chainMatch = responseText.match(/\[CHAIN:(sepolia|amoy|fuji)\]/);
+		const chain = chainMatch ? chainMatch[1] : null;
+		// チェーンタグをテキストから除去
+		const cleanText = responseText.replace(/\s*\[CHAIN:(sepolia|amoy|fuji)\]/, "").trim();
+
+		const CHAIN_NAMES: Record<string, string> = {
+			sepolia: "Ethereum Sepolia",
+			amoy: "Polygon Amoy",
+			fuji: "Avalanche Fuji",
+		};
+
 		return new Response(
-			response.text || "エージェントからの応答がありませんでした",
+			JSON.stringify({
+				text: cleanText,
+				chain: chain,
+				chainName: chain ? CHAIN_NAMES[chain] : null,
+			}),
 			{
 				headers: {
-					"Content-Type": "text/plain; charset=utf-8",
+					"Content-Type": "application/json",
 				},
 			},
 		);
