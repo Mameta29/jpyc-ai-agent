@@ -36,6 +36,8 @@ export default function ChatInterface() {
 	const [profileName, setProfileName] = useState("");
 	const [friendName, setFriendName] = useState("");
 	const [friendAddress, setFriendAddress] = useState("");
+	const [walletAddress, setWalletAddress] = useState<string | null>(null);
+	const [walletError, setWalletError] = useState<string | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// メッセージが更新されたら自動スクロール
@@ -47,6 +49,24 @@ export default function ChatInterface() {
 	useEffect(() => {
 		setProfileState(getProfile());
 		setFriendsState(getFriends());
+	}, []);
+
+	// サーバーからウォレットアドレスを取得
+	useEffect(() => {
+		const fetchAddress = async () => {
+			try {
+				const response = await fetch("/api/address");
+				const data = await response.json();
+				if (data.success) {
+					setWalletAddress(data.address);
+				} else {
+					setWalletError(data.error || "取得失敗");
+				}
+			} catch {
+				setWalletError("接続エラー");
+			}
+		};
+		fetchAddress();
 	}, []);
 
 
@@ -184,9 +204,18 @@ export default function ChatInterface() {
 						</div>
 						<div className="h-8 w-px bg-gradient-to-b from-transparent via-primary-500/50 to-transparent"></div>
 						<div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-500/10 border border-primary-500/20">
-							<div className="w-2 h-2 rounded-full bg-accent-green animate-pulse"></div>
+							<div className={`w-2 h-2 rounded-full ${walletAddress ? "bg-accent-green" : walletError ? "bg-red-400" : "bg-yellow-400"} animate-pulse`}></div>
 							<span className="text-sm font-medium text-primary-300">
 								{currentChainName}
+							</span>
+						</div>
+						<div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-dark-800/50 border border-primary-500/10">
+							<span className="text-xs font-mono text-dark-400">
+								{walletAddress
+									? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+									: walletError
+										? `Error: ${walletError}`
+										: "接続中..."}
 							</span>
 						</div>
 					</div>
